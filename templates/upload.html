@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploader une image</title>
+    <!-- CSS externe pour tous les styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête avec bouton retour -->
+        <div class="header">
+            <a href="/" class="back-btn">← Retour</a>
+            <h1>📤 Uploader une image</h1>
+        </div>
+        
+        <!-- Zone de drag & drop -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Cliquez ou glissez votre image ici</div>
+            <div class="upload-hint">PNG, JPG, JPEG acceptés (max 16MB)</div>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        
+        <!-- Prévisualisation de l'image -->
+        <div class="preview-container" id="previewContainer">
+            <h3>Aperçu</h3>
+            <img id="previewImage" class="preview-image" alt="Preview">
+        </div>
+        
+        <!-- Bouton de prédiction -->
+        <button class="predict-btn" id="predictBtn">🎯 Prédire</button>
+        
+        <!-- Loader pendant le traitement -->
+        <div class="loader" id="loader"></div>
+        
+        <!-- Zone d'affichage des résultats -->
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // ÉLÉMENTS DOM
+        // ============================================================================
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const predictBtn = document.getElementById('predictBtn');
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        
+        let selectedFile = null;
+        
+        // ============================================================================
+        // GESTION DU CLIC SUR LA ZONE D'UPLOAD
+        // ============================================================================
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // ============================================================================
+        // GESTION DE LA SÉLECTION DE FICHIER
+        // ============================================================================
+        
+        fileInput.addEventListener('change', function(e) {
+            handleFile(e.target.files[0]);
+        });
+        
+        // ============================================================================
+        // DRAG & DROP - Événements de glisser-déposer
+        // ============================================================================
+        
+        /**
+         * Gère l'événement dragover (fichier au-dessus de la zone)
+         */
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault(); // Nécessaire pour autoriser le drop
+            uploadArea.classList.add('dragover');
+        });
+        
+        /**
+         * Gère l'événement dragleave (fichier quitte la zone)
+         */
+        uploadArea.addEventListener('dragleave', function(e) {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        /**
+         * Gère l'événement drop (fichier déposé)
+         */
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+        
+        // ============================================================================
+        // TRAITEMENT DU FICHIER
+        // ============================================================================
+        
+        /**
+         * Traite le fichier sélectionné et affiche la prévisualisation.
+         * 
+         * @param {File} file - Le fichier image sélectionné
+         */
+        function handleFile(file) {
+            if (!file) return;
+            
+            // Vérifier que c'est bien une image
+            if (!file.type.startsWith('image/')) {
+                alert('Veuillez sélectionner une image valide (PNG, JPG, JPEG).');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Lire le fichier et créer une URL de prévisualisation
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                predictBtn.style.display = 'inline-block';
+                resultsDiv.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // ============================================================================
+        // PRÉDICTION
+        // ============================================================================
+        
+        /**
+         * Envoie l'image au serveur Flask pour obtenir les prédictions.
+         */
+        predictBtn.addEventListener('click', async function() {
+            if (!selectedFile) return;
+            
+            // Afficher le loader et masquer le bouton
+            loader.style.display = 'block';
+            predictBtn.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            
+            // Créer le FormData avec le fichier
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                // Envoyer la requête POST au serveur
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Masquer le loader
+                loader.style.display = 'none';
+                
+                if (response.ok) {
+                    // Afficher les résultats
+                    displayResults(data);
+                } else {
+                    // Afficher l'erreur
+                    alert('Erreur: ' + data.error);
+                    predictBtn.style.display = 'inline-block';
+                }
+                
+            } catch (error) {
+                loader.style.display = 'none';
+                predictBtn.style.display = 'inline-block';
+                alert('Erreur lors de la prédiction: ' + error);
+                console.error('Prediction error:', error);
+            }
+        });
+        
+        // ============================================================================
+        // AFFICHAGE DES RÉSULTATS
+        // ============================================================================
+        
+        /**
+         * Affiche les résultats des prédictions MLP et CNN.
+         * 
+         * @param {Object} data - Données de prédiction du serveur
+         */
+        function displayResults(data) {
+            resultsDiv.innerHTML = `
+                <h2>📊 Résultats de la prédiction</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>🧠 MLP (Multi-Layer Perceptron)</h3>
+                        <div class="prediction">${data.mlp_prediction}</div>
+                        <div class="confidence">Confiance: ${data.mlp_confidence}%</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>🔍 CNN (Convolutional Neural Network)</h3>
+                        <div class="prediction">${data.cnn_prediction}</div>
+                        <div class="confidence">Confiance: ${data.cnn_confidence}%</div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            predictBtn.style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>

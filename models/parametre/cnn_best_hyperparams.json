@@ -1,0 +1,18 @@
+{
+  "n_conv_layers": 2,
+  "conv_channels": [
+    64,
+    64
+  ],
+  "n_fc_layers": 1,
+  "fc_sizes": [
+    160
+  ],
+  "kernel_size": 5,
+  "dropout": 0.5,
+  "learning_rate": 0.0013149589247746262,
+  "l2_lambda": 5e-5,
+  "batch_norm": false,
+  "activation": "gelu",
+  "best_dev_accuracy": 0.99025
+}

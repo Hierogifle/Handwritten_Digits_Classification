@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dessiner un chiffre</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-btn">← Retour</a>
+            <h1>✏️ Dessinez votre chiffre</h1>
+        </div>
+        
+        <div class="instructions">
+            <p>Dessinez un chiffre de 0 à 9 dans le cadre ci-dessous</p>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="canvas" width="400" height="400"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button class="predict-btn" id="predictBtn">🎯 Prédire</button>
+            <button class="clear-btn" id="clearBtn">🗑️ Effacer</button>
+        </div>
+        
+        <div class="loader" id="loader"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Le JavaScript reste identique
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'black';
+        
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        
+        function initCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        initCanvas();
+        
+        function getPointerPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPointerPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const pos = getPointerPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            initCanvas();
+            document.getElementById('results').style.display = 'none';
+        });
+        
+        document.getElementById('predictBtn').addEventListener('click', async function() {
+            const loader = document.getElementById('loader');
+            const results = document.getElementById('results');
+            loader.style.display = 'block';
+            results.style.display = 'none';
+            
+            canvas.toBlob(async function(blob) {
+                const formData = new FormData();
+                formData.append('file', blob, 'drawing.png');
+                
+                try {
+                    const response = await fetch('/api/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    loader.style.display = 'none';
+                    
+                    if (response.ok) {
+                        displayResults(data);
+                    } else {
+                        alert('Erreur: ' + data.error);
+                    }
+                } catch (error) {
+                    loader.style.display = 'none';
+                    alert('Erreur lors de la prédiction: ' + error);
+                }
+            }, 'image/png');
+        });
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h2>📊 Résultats de la prédiction</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>🧠 MLP (Multi-Layer Perceptron)</h3>
+                        <div class="prediction">${data.mlp_prediction}</div>
+                        <div class="confidence">Confiance: ${data.mlp_confidence}%</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>🔍 CNN (Convolutional Neural Network)</h3>
+                        <div class="prediction">${data.cnn_prediction}</div>
+                        <div class="confidence">Confiance: ${data.cnn_confidence}%</div>
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

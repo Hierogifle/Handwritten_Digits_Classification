@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capturer une photo</title>
+    <!-- CSS externe pour tous les styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête avec bouton retour -->
+        <div class="header">
+            <a href="/" class="back-btn">← Retour</a>
+            <h1>📷 Capturer une photo</h1>
+        </div>
+        
+        <!-- Avertissement de permissions caméra -->
+        <div class="warning" id="warning">
+            <p>⚠️ Cette fonctionnalité nécessite l'accès à votre caméra</p>
+        </div>
+        
+        <!-- Conteneur vidéo/canvas -->
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" width="480" height="480"></canvas>
+        </div>
+        
+        <!-- Boutons de contrôle -->
+        <div class="controls">
+            <button class="primary-btn" id="startBtn">🎥 Activer la caméra</button>
+            <button class="secondary-btn" id="captureBtn" disabled>📸 Capturer</button>
+            <button class="danger-btn" id="retakeBtn" style="display:none;">🔄 Reprendre</button>
+            <button class="primary-btn" id="predictBtn" style="display:none;">🎯 Prédire</button>
+        </div>
+        
+        <!-- Loader pendant le traitement -->
+        <div class="loader" id="loader"></div>
+        
+        <!-- Zone d'affichage des résultats -->
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // ÉLÉMENTS DOM
+        // ============================================================================
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const predictBtn = document.getElementById('predictBtn');
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        const warning = document.getElementById('warning');
+        
+        let stream = null;
+        let capturedImage = null;
+        
+        // ============================================================================
+        // ACTIVATION DE LA CAMÉRA
+        // ============================================================================
+        
+        /**
+         * Active la caméra de l'appareil avec getUserMedia API.
+         * Préfère la caméra arrière sur mobile (facingMode: 'environment').
+         */
+        startBtn.addEventListener('click', async function() {
+            try {
+                // Demander l'accès à la caméra
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 480 },
+                        height: { ideal: 480 },
+                        facingMode: 'environment' // Caméra arrière sur mobile
+                    },
+                    audio: false
+                });
+                
+                // Connecter le stream vidéo à l'élément video
+                video.srcObject = stream;
+                
+                // Activer le bouton de capture
+                captureBtn.disabled = false;
+                startBtn.disabled = true;
+                warning.style.display = 'none';
+                
+                console.log('✅ Caméra activée avec succès');
+                
+            } catch (error) {
+                alert(
+                    'Erreur d\'accès à la caméra: ' + error.message + 
+                    '\n\nVérifiez que:\n' +
+                    '- Vous avez autorisé l\'accès à la caméra\n' +
+                    '- Vous êtes sur HTTPS ou localhost\n' +
+                    '- Votre navigateur supporte getUserMedia'
+                );
+                console.error('Camera error:', error);
+            }
+        });
+        
+        // ============================================================================
+        // CAPTURE DE PHOTO
+        // ============================================================================
+        
+        /**
+         * Capture l'image actuelle de la vidéo sur le canvas.
+         */
+        captureBtn.addEventListener('click', function() {
+            // Dessiner l'image vidéo actuelle sur le canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Basculer l'affichage: masquer vidéo, afficher canvas
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+            
+            // Modifier les boutons disponibles
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+            predictBtn.style.display = 'inline-block';
+            
+            // Convertir le canvas en blob pour l'upload
+            canvas.toBlob(function(blob) {
+                capturedImage = blob;
+                console.log('📸 Photo capturée');
+            }, 'image/png');
+        });
+        
+        // ============================================================================
+        // REPRENDRE UNE PHOTO
+        // ============================================================================
+        
+        /**
+         * Permet de reprendre une nouvelle photo.
+         * Réaffiche le flux vidéo en direct.
+         */
+        retakeBtn.addEventListener('click', function() {
+            // Réafficher la vidéo en direct
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+            
+            // Réinitialiser les boutons
+            captureBtn.style.display = 'inline-block';
+            retakeBtn.style.display = 'none';
+            predictBtn.style.display = 'none';
+            
+            // Masquer les résultats précédents
+            resultsDiv.style.display = 'none';
+            
+            console.log('🔄 Prêt pour une nouvelle capture');
+        });
+        
+        // ============================================================================
+        // PRÉDICTION
+        // ============================================================================
+        
+        /**
+         * Envoie la photo capturée au serveur Flask pour obtenir les prédictions.
+         */
+        predictBtn.addEventListener('click', async function() {
+            if (!capturedImage) {
+                alert('Aucune image capturée');
+                return;
+            }
+            
+            // Afficher le loader et masquer le bouton
+            loader.style.display = 'block';
+            predictBtn.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            
+            // Créer le FormData avec l'image capturée
+            const formData = new FormData();
+            formData.append('file', capturedImage, 'capture.png');
+            
+            try {
+                // Envoyer la requête POST au serveur
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Masquer le loader
+                loader.style.display = 'none';
+                
+                if (response.ok) {
+                    // Afficher les résultats
+                    displayResults(data);
+                } else {
+                    // Afficher l'erreur
+                    alert('Erreur: ' + data.error);
+                    predictBtn.style.display = 'inline-block';
+                }
+                
+            } catch (error) {
+                loader.style.display = 'none';
+                predictBtn.style.display = 'inline-block';
+                alert('Erreur lors de la prédiction: ' + error);
+                console.error('Prediction error:', error);
+            }
+        });
+        
+        // ============================================================================
+        // AFFICHAGE DES RÉSULTATS
+        // ============================================================================
+        
+        /**
+         * Affiche les résultats des prédictions MLP et CNN.
+         * 
+         * @param {Object} data - Données de prédiction du serveur
+         */
+        function displayResults(data) {
+            resultsDiv.innerHTML = `
+                <h2>📊 Résultats de la prédiction</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>🧠 MLP (Multi-Layer Perceptron)</h3>
+                        <div class="prediction">${data.mlp_prediction}</div>
+                        <div class="confidence">Confiance: ${data.mlp_confidence}%</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>🔍 CNN (Convolutional Neural Network)</h3>
+                        <div class="prediction">${data.cnn_prediction}</div>
+                        <div class="confidence">Confiance: ${data.cnn_confidence}%</div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            predictBtn.style.display = 'inline-block';
+            
+            console.log('✅ Résultats affichés:', data);
+        }
+        
+        // ============================================================================
+        // NETTOYAGE À LA FERMETURE DE LA PAGE
+        // ============================================================================
+        
+        /**
+         * Arrête proprement le stream vidéo quand l'utilisateur quitte la page.
+         * Cela libère la caméra pour d'autres applications.
+         */
+        window.addEventListener('beforeunload', function() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('🛑 Caméra arrêtée');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

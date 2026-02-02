@@ -1,0 +1,18 @@
+{
+    "n_layers": 2,
+    "layer_sizes": [
+        160,
+        112
+    ],
+    "activation": "relu",
+    "learning_rate": 0.002,
+    "iterations": 267,
+    "l2_lambda": 0.006,
+    "dropout": 0.55,
+    "batch_norm": true,
+    "init_method": "he",
+    "optimizer": "adamw",
+    "scheduler": "plateau",
+    "grad_clip": 0.5030386207924418,
+    "best_dev_accuracy": 0.9806666374206543
+}

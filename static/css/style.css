@@ -1,0 +1,630 @@
+/**
+ * Fichier CSS principal pour l'application de reconnaissance de chiffres
+ * 
+ * Structure:
+ * 1. Variables CSS
+ * 2. Reset & styles de base
+ * 3. Layout & containers
+ * 4. Composants (boutons, cartes, etc.)
+ * 5. Pages spécifiques
+ * 6. Animations
+ * 7. Responsive
+ * 
+ * Auteur: [Ton nom]
+ * Date: 23 janvier 2026
+ */
+
+/* ============================================================================
+   1. VARIABLES CSS - Personnalisation facile des couleurs et dimensions
+   ============================================================================ */
+
+:root {
+    /* Couleurs principales */
+    --primary-color: #6366f1;           /* Indigo pour les boutons principaux */
+    --primary-hover: #4f46e5;           /* Indigo foncé au survol */
+    --secondary-color: #8b5cf6;         /* Violet pour les accents */
+    
+    /* Couleurs de fond */
+    --background: #0f172a;              /* Fond sombre principal */
+    --surface: #1e293b;                 /* Surface de cartes */
+    --surface-hover: #334155;           /* Surface au survol */
+    
+    /* Couleurs de texte */
+    --text-primary: #f1f5f9;            /* Texte principal (clair) */
+    --text-secondary: #cbd5e1;          /* Texte secondaire (gris) */
+    
+    /* Couleurs d'état */
+    --success: #10b981;                 /* Vert pour succès */
+    --danger: #ef4444;                  /* Rouge pour erreurs/suppression */
+    --warning: #f59e0b;                 /* Orange pour avertissements */
+    
+    /* Effets */
+    --shadow: rgba(0, 0, 0, 0.3);       /* Ombre standard */
+    --shadow-hover: rgba(99, 102, 241, 0.4);  /* Ombre colorée au survol */
+    
+    /* Dimensions */
+    --border-radius: 10px;              /* Arrondi standard */
+    --border-radius-lg: 20px;           /* Arrondi large */
+    --spacing-sm: 10px;                 /* Petit espacement */
+    --spacing-md: 20px;                 /* Espacement moyen */
+    --spacing-lg: 40px;                 /* Grand espacement */
+    
+    /* Transitions */
+    --transition-speed: 0.3s;           /* Vitesse des animations */
+}
+
+/* ============================================================================
+   2. RESET & STYLES DE BASE
+   ============================================================================ */
+
+/* Reset des marges et paddings pour tous les éléments */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Style du body - Dégradé de fond et police */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--background) 0%, #1e293b 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: var(--spacing-md);
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   3. LAYOUT & CONTAINERS
+   ============================================================================ */
+
+/* Conteneur principal - centré avec largeur max */
+.container {
+    max-width: 1500px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* En-tête avec navigation */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* Titres avec dégradé */
+h1 {
+    font-size: 5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+}
+
+/* Sous-titres */
+h2 {
+    font-size: 2rem;
+    font-weight: 350;
+    color: "white";
+    margin-bottom: 15px;
+}
+
+/* Sous-titres */
+h3 {
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+/* Paragraphes */
+p {
+    font-size: 1.2rem;
+    color: "white";
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   4. COMPOSANTS - Boutons, cartes, etc.
+   ============================================================================ */
+
+/* --- BOUTONS --- */
+
+/* Style de base pour tous les boutons */
+button {
+    padding: 15px 30px;
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    font-weight: 600;
+    box-shadow: 0 5px 15px var(--shadow);
+    font-family: inherit;
+}
+
+button:hover {
+    transform: translateY(-3px);
+}
+
+button:active {
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Bouton principal (dégradé) */
+.primary-btn,
+.predict-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.primary-btn:hover,
+.predict-btn:hover {
+    box-shadow: 0 10px 25px var(--shadow-hover);
+}
+
+/* Bouton secondaire (succès/validation) */
+.secondary-btn {
+    background: var(--success);
+    color: white;
+}
+
+.secondary-btn:hover {
+    background: #059669;
+}
+
+/* Bouton danger (suppression/effacement) */
+.danger-btn,
+.clear-btn {
+    background: var(--danger);
+    color: white;
+}
+
+.danger-btn:hover,
+.clear-btn:hover {
+    background: #dc2626;
+}
+
+/* Bouton retour */
+.back-btn {
+    position: absolute;
+    left: 0;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    background: var(--surface-hover);
+    transform: translateX(-5px);
+}
+
+/* Conteneur de boutons */
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: var(--spacing-md) 0;
+    flex-wrap: wrap;
+}
+
+/* --- CARTES --- */
+
+/* Grille de cartes (page d'accueil) */
+.options-grid,
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+/* Carte d'option (page d'accueil) */
+.option-card {
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    padding: 40px 30px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    border: 2px solid transparent;
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    box-shadow: 0 10px 30px var(--shadow);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Délais d'animation progressifs */
+.option-card:nth-child(1) { animation-delay: 0.1s; }
+.option-card:nth-child(2) { animation-delay: 0.2s; }
+.option-card:nth-child(3) { animation-delay: 0.3s; }
+
+.option-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary-color);
+    background: var(--surface-hover);
+    box-shadow: 0 20px 40px var(--shadow-hover);
+}
+
+/* Icône dans les cartes */
+.icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+/* Carte de résultat */
+.result-card {
+    background: var(--surface);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow);
+    animation: fadeIn 0.5s ease;
+}
+
+/* Chiffre prédit (grand) */
+.prediction {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--success);
+    margin: var(--spacing-md) 0;
+}
+
+/* Pourcentage de confiance */
+.confidence {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================================================
+   5. PAGES SPÉCIFIQUES
+   ============================================================================ */
+
+/* --- PAGE DESSIN (draw.html) --- */
+
+/* Conteneur du canvas avec fond blanc */
+.canvas-container {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: 0 20px 60px var(--shadow);
+    margin: 30px 0;
+    display: inline-block;
+}
+
+/* Canvas de dessin */
+#canvas {
+    border: 3px solid var(--primary-color);
+    cursor: crosshair;
+    border-radius: var(--border-radius);
+    touch-action: none; /* Empêche le scroll sur mobile */
+    display: block;
+}
+
+/* --- PAGE UPLOAD (upload.html) --- */
+
+/* Zone de drag & drop */
+.upload-area {
+    background: var(--surface);
+    border: 3px dashed var(--primary-color);
+    border-radius: var(--border-radius-lg);
+    padding: 60px 40px;
+    margin: 30px 0;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    background: var(--surface-hover);
+    border-color: var(--secondary-color);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.upload-text {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.upload-hint {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Input file caché */
+input[type="file"] {
+    display: none;
+}
+
+/* Conteneur de prévisualisation */
+.preview-container {
+    display: none;
+    margin: 30px 0;
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.preview-image {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px var(--shadow);
+}
+
+/* --- PAGE CAMÉRA (camera.html) --- */
+
+/* Conteneur caméra */
+.camera-container {
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: 0 20px 60px var(--shadow);
+    margin: 30px 0;
+}
+
+/* Éléments vidéo et canvas */
+#video,
+#canvas {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px var(--shadow);
+}
+
+/* Avertissement de permissions */
+.warning {
+    background: var(--surface);
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    color: var(--text-secondary);
+    margin: var(--spacing-md) 0;
+}
+
+/* Instructions */
+.instructions {
+    background: var(--surface);
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    margin: var(--spacing-md) 0;
+    color: var(--text-secondary);
+}
+
+/* --- ZONE DE RÉSULTATS --- */
+
+#results {
+    margin-top: var(--spacing-lg);
+    display: none;
+}
+
+/* --- LOADER --- */
+
+.loader {
+    display: none;
+    border: 4px solid var(--surface);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+
+/* --- FOOTER --- */
+
+.footer {
+    margin-top: 60px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ============================================================================
+   6. ANIMATIONS
+   ============================================================================ */
+
+/* Animation de rotation (loader) */
+@keyframes spin {
+    0% { 
+        transform: rotate(0deg); 
+    }
+    100% { 
+        transform: rotate(360deg); 
+    }
+}
+
+/* Animation d'apparition depuis le haut */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animation d'apparition depuis le bas */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animation d'apparition simple */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Application des animations */
+.header {
+    animation: fadeInDown 0.8s ease-out;
+}
+
+/* ============================================================================
+   7. RESPONSIVE - Adaptations pour mobile et tablette
+   ============================================================================ */
+
+/* Tablettes (largeur < 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
+}
+
+/* Mobile (largeur < 768px) */
+@media (max-width: 768px) {
+    /* Réduction des tailles de police */
+    h1 {
+        font-size: 3rem;
+    }
+    
+    h2 {
+        font-size: 1.2rem;
+    }
+    
+    h3 {
+        font-size: 1.5
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+    
+    /* Grilles en une seule colonne */
+    .options-grid,
+    .results-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Canvas pleine largeur */
+    #canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .canvas-container,
+    .camera-container {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Upload area réduit */
+    .upload-area {
+        padding: 40px 20px;
+    }
+    
+    /* Boutons plus petits */
+    button {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+    
+    /* Prédiction moins grande */
+    .prediction {
+        font-size: 3rem;
+    }
+}
+
+/* Très petits écrans (largeur < 480px) */
+@media (max-width: 480px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .option-card {
+        padding: 30px 20px;
+    }
+    
+    .icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+}
+
+/* ============================================================================
+   8. UTILITAIRES
+   ============================================================================ */
+
+/* Classes d'affichage */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+/* Classes de texte */
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Espacements */
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }

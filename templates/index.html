@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconnaissance de Chiffres - IA</title>
+    <!-- Lien vers le CSS externe avec url_for pour Flask -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Reconnaissance de Chiffres</h1>
+            <h2>Deep Learning au service de votre écriture catastrophique 🚀</h2>
+            <h2>99% de précision, 100% de confiance (enfin presque) 🎲</h2>
+        </div>
+        
+        <div class="options-grid">
+            <a href="/upload" class="option-card">
+                <div class="icon">📤</div>
+                <h3>Un chiffre qui traîne sur votre PC ?<br>
+                    On le prend !
+                </h3>
+                <p>PNG, JPG, n'importe quelle image fait l'affaire</p>
+            </a>
+            
+            <a href="/draw" class="option-card">
+                <div class="icon">✏️</div>
+                <h3>Gribouillez, on traduira</h3>
+                <p>Libérez l'artiste qui est en vous (ou pas)</p>
+            </a>
+            
+            <a href="/camera" class="option-card">
+                <div class="icon">📷</div>
+                <h3>Say cheese! Enfin...<br>
+                    Say chiffre!
+                </h3>
+                <p>Prenez-le en photo, on fait le reste</p>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <h2>Aucun neurone n'a été maltraité dans cette application</h2>
+            <h2>Entraîné sur 60k images MNIST | Testé sur vos gribouillis ✍️</h2>
+        </div>
+    </div>
+</body>
+</html>
