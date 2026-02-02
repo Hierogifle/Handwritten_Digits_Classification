@@ -251,7 +251,7 @@ Handwritten-Digits-Classification/
 │   ├── data_analyse.md            # Analyse des données
 │   └── to_do.md                   # Tâches en cours
 │
-├── graphiques/                     # Visualisations générées
+|                     
 │
 ├── README.md                       # Ce fichier
 └── .gitignore                      # Fichiers ignorés
@@ -415,54 +415,6 @@ Les images sont automatiquement nettoyées. Si problème :
 rm -rf static/temp/*  # Linux/Mac
 rmdir /s static\temp\  # Windows
 ```
-
----
-
-## 📈 Améliorations futures
-
-- [ ] Interface de configuration des modèles
-- [ ] Export des résultats (PNG, CSV)
-- [ ] Historique des prédictions
-- [ ] Entraînement personnalisé
-- [ ] Comparaison de modèles
-- [ ] Documentation interactive
-
----
-
-## 🤝 Contribution
-
-Les contributions sont bienvenues ! Pour contribuer :
-
-1. **Fork** le repository
-2. **Créez une branche** (`git checkout -b feature/amelioration`)
-3. **Commitez vos changements** (`git commit -m 'Ajout de feature'`)
-4. **Pushez la branche** (`git push origin feature/amelioration`)
-5. **Ouvrez une Pull Request**
-
----
-
-## 📄 Licence
-
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
-
----
-
-## 👤 Auteur
-
-**Romualda / DoreneABESSOLO**
-
-- GitHub : [@DoreneABESSOLO](https://github.com/DoreneABESSOLO)
-- Projet : Reconnaissance de chiffres manuscrits (La Plateforme)
-
----
-
-## 📞 Support
-
-Pour des questions ou des problèmes :
-
-- 📧 Ouvrez une **issue** sur GitHub
-- 💬 Consultez la **documentation** dans le dossier `documentation/`
-- 📚 Lisez les **commentaires du code** dans `app.py`
 
 ---
 
